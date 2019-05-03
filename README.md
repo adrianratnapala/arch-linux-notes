@@ -59,7 +59,9 @@ This is not proof, but it will do for me.
 Easy peasy for nerds, and since this is he 21st century, we even have a
 progress indicator.
 
-    dd status=progress bs=8192000 if=archlinux-2019.04.01-x86_64.iso of=<b>/SOME USB DEVICE/</b>
+<pre>
+dd status=progress bs=8192000 if=archlinux-2019.04.01-x86_64.iso of=<b>/SOME USB DEVICE/</b>
+</pre>
 
 Booting into the installer
 --------------------------
