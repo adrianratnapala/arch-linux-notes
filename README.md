@@ -61,3 +61,19 @@ progress indicator.
 
     dd status=progress bs=8192000 if=archlinux-2019.04.01-x86_64.iso of=<b>/SOME USB DEVICE/</b>
 
+Booting into the installer
+--------------------------
+
+You run the installer that you just flashed by booting of the stick.  How this
+is done depends on your machine.  See my notes for
+
+* [Lenovo Thinkpad X1 Carbon 5th Gen (20HRA04JAU)](thinkpad-x1-5th)
+
+
+TODO
+----
+
+* microcode
+* X11
+* secure boot
+* firmware
