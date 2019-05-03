@@ -89,6 +89,90 @@ Internet connectivity is the only potential trouble. My two-cents are:
 * One time I needed to **boot without the cable plugged in**.  But the problem
   did not recur. YYMV.
 
+Disks
+-----
+
+I want to encrypt my as much as possible, but still boot simply.  So I will set
+up `scooter19` with:
+
+* Have an unencrypted `/boot`, this is the same thing as the [(U)EFI
+  parition](uefi).  This parition shipped partition 1, with the volume label
+  `SYSTEM`.
+* Put the rest of the disk on encrypted [LUKS][luks] volume `cryptlvm`
+* Map this 1-1 onto a [LVM][lvm] volume group `cryptvg`, on which I have
+  - A 50G volume `ROOT` ('/', '/var' and '/usr')
+  - A 20G volume called `SWAP`, not used, but reserved for when I do hibernate-to-disk
+  - The rest is `HOME`, for `/home`
+
+The main authority for the encryption stuff is
+[https://wiki.archlinux.org/index.php/Dm-crypt][luks].
+Which has a sub-page for this kind of [LVM-on-LUKS][lvm-on-luks] setup.
+
+[LVM]: https://wiki.archlinux.org/index.php/LVM
+[luks]: https://wiki.archlinux.org/index.php/Dm-crypt
+[lvm-on-luks]: https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system#LVM_on_LUKS
+
+### Paritiong
+
+I did the partitioning with `fdisk`, but dumped the result using
+
+    sfdisk -d /dev/nvme0n1 > MOUNTED_EFI_PARITION/2019-04/nvme0n1-after.dump
+
+Yielding
+
+        label: gpt
+        label-id: AF64EACC-EC26-44BA-81FA-A8924D5C663D
+        device: /dev/nvme0n1
+        unit: sectors
+        first-lba: 34
+        last-lba: 1000215182
+
+        /dev/nvme0n1p1 : start=        2048, size=      532480, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, uuid=F8D454E8-800B-46A0-8353-ABE9169B9FBE, name="EFI system partition", attrs="RequiredPartition GUID:63"
+        /dev/nvme0n1p2 : start=      534528, size=   999680655, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=E8C7DE15-C7C2-9D41-934E-F07302F2C283
+
+Because the `/boot` partition is shared outside of Linux, I have not formatted
+it.  That made it a nice place to keep logs of what I was doing.  The following
+is not exactly a shell script, but I could uncomment whichever line I wanted
+and then run it:
+
+### Formatting etc.
+
+    luks+lvm
+    --------
+    DEV=/dev/nvme0n1p2
+    #cryptsetup luksFormat --type luks2 "$DEV" # interactive, asks for passphrase
+    #cryptsetup open "$DEV" cryptlvm # interactive, asks for passphrase
+    cryptsetup open UUID=cf550c62-63b0-49fc-804a-3b4b112bcc03 cryptlvm
+    echo $/dev/mapper
+    ls /dev/mapper -l
+
+    LVM_DEV=/dev/mapper/cryptlvm
+    #pvcreate "$LVM_DEV"
+    #vgcreate cryptvg "$LVM_DEV"
+
+    #lvcreate -L 20G cryptvg -n SWAP
+    #lvcreate -L 50G cryptvg -n ROOT
+    #lvcreate -l 100%FREE cryptvg -n HOME
+
+    #mkfs.ext4 -v /dev/cryptvg/ROOT -L ROOT
+    #mkfs.ext4 -v /dev/cryptvg/HOME -L HOME
+    # Do no make swap yet.
+
+Notice the crypt device has two different UUIDs:
+
+* `E8C7DE15-C7C2-9D41-934E-F07302F2C283` is the *GPT partition* UUID
+  and is used in device names like `PARTUUID=....` and
+  `/dev/disk/by-partuuid/...`
+
+* `f550c62-63b0-49fc-804a-3b4b112bcc03` was inserted by `luksFormat` and Linux
+   seems to consider it the "real" UUID -- we can name the device with
+   `UUID=...` or `/dev/disk/by-uuid/....
+
+There is a similar distniction between volume labels and GPT parition labels.
+The salient difference is that if you `dd` the an image to some other device, you
+will retain the UUID and LABEL, but not the PARTUUID and PARTLABEL.
+
+
 TODO
 ----
 
@@ -96,3 +180,4 @@ TODO
 * X11
 * secure boot
 * firmware
+* hibernate to disk
