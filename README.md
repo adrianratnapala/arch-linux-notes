@@ -63,14 +63,31 @@ progress indicator.
 dd status=progress bs=8192000 if=archlinux-2019.04.01-x86_64.iso of=<b>/SOME USB DEVICE/</b>
 </pre>
 
-Booting into the installer
---------------------------
+Booting into the live environment
+---------------------------------
 
 You run the installer that you just flashed by booting of the stick.  How this
 is done depends on your machine.  See my notes for
 
 * [Lenovo Thinkpad X1 Carbon 5th Gen (20HRA04JAU)](thinkpad-x1-5th)
 
+One you the boot menu from the stick, select **Boot Arch Linux**.  This will
+get you into a live Arch Linux environment that you can use to install the
+system, and also as a rescue disc.
+
+
+## Make the live environment usable
+
+At this point you will be following
+https://wiki.archlinux.org/index.php/Installation_guide#Pre-installation which
+is mostly about making the live environment itself usable.  Just do it.
+
+Internet connectivity is the only potential trouble. My two-cents are:
+
+* **Use a wired connection**, the live environment will probably just work
+  (using DHCP) as soon as you plug it in.
+* One time I needed to **boot without the cable plugged in**.  But the problem
+  did not recur. YYMV.
 
 TODO
 ----
