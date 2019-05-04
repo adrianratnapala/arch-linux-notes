@@ -100,7 +100,7 @@ up `scooter19` with:
   `SYSTEM`.
 * Put the rest of the disk on encrypted [LUKS][luks] volume `cryptlvm`
 * Map this 1-1 onto a [LVM][lvm] volume group `cryptvg`, on which I have
-  - A 50G volume `ROOT` ('/', '/var' and '/usr')
+  - A 50G volume `ROOT` (`/`, `/var` and `/usr`)
   - A 20G volume called `SWAP`, not used, but reserved for when I do hibernate-to-disk
   - The rest is `HOME`, for `/home`
 
@@ -112,7 +112,7 @@ Which has a sub-page for this kind of [LVM-on-LUKS][lvm-on-luks] setup.
 [luks]: https://wiki.archlinux.org/index.php/Dm-crypt
 [lvm-on-luks]: https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system#LVM_on_LUKS
 
-### Paritiong
+### Partitioning
 
 I did the partitioning with `fdisk`, but dumped the result using
 
