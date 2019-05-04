@@ -266,7 +266,69 @@ Now we run
 Which dumps the files
 
     /boot/initramfs-linux-fallback.img
-    /boot/initramfs-linux.im
+    /boot/initramfs-linux.img
+
+### Booting directly from [UEFI](uefi)
+
+We have already set `/boot` as the our EFI partition, and so the kernel and the
+
+initramfs image are both already there.  And ArchLinux kernel's are built with
+EFISTUB available, which means they are valid UEFI binaries.  So one way to
+boot the kernel is:
+
+* Boot the install stick, but select "EUFI Shell v2"
+* Go to the EFI disk, i.e. type:
+
+    fs1:
+
+* Boot the kerenel, commad-line params and all
+
+    \vmlinuz-linux cryptdevice=UUID=cf550c62-63b0-49fc-804a-3b4b112bcc03:cryptlvm root=LABEL=ROOT rw initrd=\initramfs-linux-fallback.img
+
+Notice we use DOS style forward slashes for paths, even the initrd path.
+
+**I made a tricky mistake with cryptdevice**.  I had left of the name
+`:cryptlvm` from the end, and kept getting an error message instead of a
+password prompt.  But because I didn't understand the messages, I believed for
+a long time that my *keyboard* wasn't working and played around fruitlessly
+with different keyboards, and different initrd configs.
+
+I took a painfully long time to get the command line right.  Helpfully, UEFI
+has it's own batch-files, so could iterate on the file:
+
+        archlinux.nsh
+        ------------------
+        hd1b:
+        \vmlinuz-linux cryptdevice=UUID=cf550c62-63b0-49fc-804a-3b4b112bcc03:cryptlvm root=LABEL=ROOT rw initrd=\initramfs-linux-fallback.img
+
+* I believe `hd1b:` is the same device as `fs1`, but more with a more stable name.
+* `UEFI` seems to prefer UCS-2 encoding, but you can use plain-old ascii files too.
+
+### Setting up the boot menu
+
+Once I had figured out how to boot the kernel, I shoved the command line
+directly into the UEFI boot menu.  This can be done from the UEFI shell, but I
+did it from the arch live-environment:
+
+    DISK=/dev/nvme0n1
+    PARTITION_NUM=1
+    KERNEL_PARAMS='cryptdevice=UUID=cf550c62-63b0-49fc-804a-3b4b112bcc03:cryptlvm root=LABEL=ROOT rw initrd=\initramfs-linux-fallback.img'
+
+    efibootmgr --create  \
+            --disk "$DISK" \
+            --part "$PARTITION_NUM" \
+            --label "vmlinuz" \
+            --loader "/vmlinuz-linux" \
+            --unicode "$KERNEL_PARAMS"
+
+I tried to make a boot entry that would run `archlinux.nsh`, but it never
+worked, and I have no good debugging info about it.  My guess is that there is
+no shell on the UEFI partition (I am running one that comes with the archlinux
+boot disk).
+
+Long term it would be nice to have both: use the shell-script version for
+normal booting so there is a single-source-of-truth, and keep a conservative
+one directly in the boot menu in case the shell isn't available.
 
 TODO
 ----
@@ -279,3 +341,4 @@ TODO
 * Put autodetect back into the HOOK, but try uncompressed.
   * Can/should it go before udev (and if does that produce a smaller image?)
   * Can the keyboard hook go before udev?
+* Put a UEFI shell in it's proper place and try to boot from the .nsh script.
