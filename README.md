@@ -92,8 +92,8 @@ Internet connectivity is the only potential trouble. My two-cents are:
 Disks
 -----
 
-I want to encrypt my as much as possible, but still boot simply.  So I will set
-up `scooter19` with:
+I want to encrypt my as much as possible, but still boot simply.  So I have
+decided for `scooter19` to:
 
 * Have an unencrypted `/boot`, this is the same thing as the [(U)EFI
   parition](uefi).  This parition shipped partition 1, with the volume label
@@ -130,12 +130,12 @@ Yielding
         /dev/nvme0n1p1 : start=        2048, size=      532480, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, uuid=F8D454E8-800B-46A0-8353-ABE9169B9FBE, name="EFI system partition", attrs="RequiredPartition GUID:63"
         /dev/nvme0n1p2 : start=      534528, size=   999680655, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=E8C7DE15-C7C2-9D41-934E-F07302F2C283
 
+### Formatting etc.
+
 Because the `/boot` partition is shared outside of Linux, I have not formatted
 it.  That made it a nice place to keep logs of what I was doing.  The following
 is not exactly a shell script, but I could uncomment whichever line I wanted
 and then run it:
-
-### Formatting etc.
 
     luks+lvm
     --------
