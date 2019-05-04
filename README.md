@@ -173,6 +173,45 @@ The salient difference is that if you `dd` the an image to some other device, yo
 will retain the UUID and LABEL, but not the PARTUUID and PARTLABEL.
 
 
+Setting up the installed OS
+---------------------------
+
+### Mounts
+
+The convention is that we mount all our filesystems under `/mnt` in a pattern
+which mirrors the mount on the final system.  On scooter19 that meant:
+
+    mount /dev/cryptvg/ROOT /mnt -L ROOT
+    mkdir /mnt/home
+    mount /dev/cryptvg/HOME /mnt/home -L HOME
+    mount /dev/by-label
+    mkdir /mnt/boot
+    mount /dev/disk/by-label/SYSTEM efi # a.k.a /dev/nvme0n1p1
+
+### Installing the packages
+
+Now we will install base packages, downloading them from repositories defined
+in `/etc/pacman.d/mirrorlist`.  You can edit that file to use mirrors near
+you, see:
+https://wiki.archlinux.org/index.php/Installation_guide#Select_the_mirrors
+
+And install with
+
+     pacstrap /mnt base
+
+
+### Post-package setup
+
+    genfstab -L /mnt >> /mnt/etc/fstab
+    arch-chroot /mnt
+
+Sets us up in some approximation of the real system (`-L` to genfstab uses
+label-based names, `-U` uses UUIDs).
+
+There are many other straightforward instructions to follow at
+https://wiki.archlinux.org/index.php/Installation_guide#Configure_the_system
+
+
 TODO
 ----
 
