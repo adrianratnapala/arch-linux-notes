@@ -211,6 +211,62 @@ label-based names, `-U` uses UUIDs).
 There are many other straightforward instructions to follow at
 https://wiki.archlinux.org/index.php/Installation_guide#Configure_the_system
 
+Booting
+-------
+
+There are many options, and I have chosen:
+
+* **Use busybox initrd** (the default), as opposed to systemd.
+
+* **Using [EFISTUB](https://wiki.archlinux.org/index.php/EFISTUB)**.  This
+  turns the Kernel into standard EUFI executable that can be run from its
+  shell, or directly from the boot menu.
+
+* **Booting the kernel directly from the boot menu**.  The alternative is to
+  write a [EUFI shell script][nsh] booted from the menu.  I have such a script,
+  which was useful for debugging, but it doesn't work from the menu -- perhaps
+  because I haven't installed a shell yet.
+
+What's tricky is to get all this to work in the face the encrypted disk.  Even
+though the [instructions][dm-crypt-sysconfig] were correct.
+
+[dm-crypt-sysconfig]: https://wiki.archlinux.org/index.php/Dm-crypt/System_configuration
+
+### mkinitcpio
+
+[mkinitcpio][mkinitcpio] is an Arch Linux tool which builds an initrd based on
+the config in `/etc/mkinitcpio.conf`
+
+`mkinitcpio` has a concept of *hooks* are modules of (shell?) code that do
+things both at build time and at boot time.  The main thing you do in
+`/etc/mkinicpio.conf` is select which hooks to apply and their order.
+
+[mkinitcpio]: https://wiki.archlinux.org/index.php/Mkinitcpio
+
+This [Dm-crypt system configuration][dm-crypt-sysconfig] wiki suggests a value
+for HOOKS, and I ended up with:
+
+   HOOKS=(base udev keyboard modconf block encrypt lvm2 filesystems fsck)
+
+Things to note are:
+
+* `autodetect` is entirely missing from here.  This means all possible kernel
+  modules etc will be included.  This is a silly thing to do, as `mkinicpio`
+  generates just such a fallback image anyway.
+
+* The `keyboard` hook is early in the list. Before the encrypt hook.  We
+  need the keyboard up and running in order to unlock the disk.  Even if I had
+  `autodetect`, I would probably put `keyboard` first, just to make sure I
+  didn't have a hardware issue at this early stage.
+
+Now we run
+
+    mkinitcpio -p linux
+
+Which dumps the files
+
+    /boot/initramfs-linux-fallback.img
+    /boot/initramfs-linux.im
 
 TODO
 ----
@@ -220,3 +276,6 @@ TODO
 * secure boot
 * firmware
 * hibernate to disk
+* Put autodetect back into the HOOK, but try uncompressed.
+  * Can/should it go before udev (and if does that produce a smaller image?)
+  * Can the keyboard hook go before udev?
