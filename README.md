@@ -375,11 +375,16 @@ Key=<b>MY WIFI KEY</b>
 *WPADriver* was a stumbling block.  By default it tries `nl80211`, which failed
 (I think there is a bug in the way it uses `libnetlink`).
 
+Wayland
+-------
+
+I am using [Wayland](wayland), via the *sway* compositor with the *kitty*
+terminal emulator.
+
 TODO
 ----
 
 * microcode
-* X11
 * secure boot
 * firmware
 * hibernate to disk
