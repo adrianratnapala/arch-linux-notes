@@ -55,4 +55,48 @@ So you can set up a menu entry with commands like:
                --loader "/vmlinuz-linux" \
                --unicode "$KERNEL_PARAMS"
 
+##  Installing a shell
+----------------------
 
+[shell-spec]: https://uefi.org/sites/default/files/resources/UEFI_Shell_Spec_2_0.pdf
+
+The [UEFI shell][shell-spec] implementation is part of an open-source effort
+called TianoCore, but we (semi) install it through an AUR package.
+
+    pacman -S fakeroot
+
+    cd ~/aur
+    git clone https://aur.archlinux.org/uefi-shell-git.git
+    cd uefi-shell-git
+    makepkg -si
+
+Which will ask for your password to become root, and then do all sorts of
+stuff, ending with
+
+    . . .
+    UEFI Shell v2 binaries are installed at /usr/share/uefi-shell/*.efi
+
+Which is a fairly annoying place to keep things.  To make the shell useable we
+have to put it on the EFI partition.
+
+   cp /usr/share/uefi-shell/shellx64_v2.efi /boot/EFI/Boot/
+   cp /usr/share/uefi-shell/shellx64_v2.efi /boot/EFI/Boot/shell.efi
+
+And then use `efibootmgr`
+
+    pacman -S efibootmgr
+
+to tell add a boot entry for launching the shell.
+
+    DISK=/dev/nvme0n1
+    PARTITION_NUM=1
+
+
+    efibootmgr --create  \
+            --disk "$DISK" \
+            --part "$PARTITION_NUM" \
+            --label "UEFI shell" \
+            --loader "/EFI/Boot/shell.efi"
+
+    # clear the boot order (i.e. go in numerical order).
+    # efibootmgr -O
