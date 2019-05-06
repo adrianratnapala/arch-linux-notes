@@ -381,6 +381,12 @@ Wayland
 I am using [Wayland](wayland), via the *sway* compositor with the *kitty*
 terminal emulator.
 
+Microcode
+---------
+
+Following: https://wiki.archlinux.org/index.php/Microcode, arch makes it easy
+to get manufacturer microcode.  [Here](microcode) is how we load it at boot.
+
 TODO
 ----
 
