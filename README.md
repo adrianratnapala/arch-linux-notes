@@ -390,11 +390,9 @@ to get manufacturer microcode.  [Here](microcode) is how we load it at boot.
 TODO
 ----
 
-* microcode
 * secure boot
 * firmware
 * hibernate to disk
 * Put autodetect back into the HOOK, but try uncompressed.
   * Can/should it go before udev (and if does that produce a smaller image?)
   * Can the keyboard hook go before udev?
-* Put a UEFI shell in it's proper place and try to boot from the .nsh script.
