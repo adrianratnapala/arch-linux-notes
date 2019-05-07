@@ -387,12 +387,18 @@ Microcode
 Following: https://wiki.archlinux.org/index.php/Microcode, arch makes it easy
 to get manufacturer microcode.  [Here](microcode) is how we load it at boot.
 
+[Suspend and Hibernate](suspend)
+-----------------
+
+Following
+https://wiki.archlinux.org/index.php/Power_management/Suspend_and_hibernate.
+
+
 TODO
 ----
 
 * secure boot
 * firmware
-* hibernate to disk
 * Put autodetect back into the HOOK, but try uncompressed.
   * Can/should it go before udev (and if does that produce a smaller image?)
   * Can the keyboard hook go before udev?
