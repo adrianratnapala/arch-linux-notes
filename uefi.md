@@ -100,3 +100,34 @@ to tell add a boot entry for launching the shell.
 
     # clear the boot order (i.e. go in numerical order).
     # efibootmgr -O
+
+
+APPENDIX: boot/set-up-efi-boot.sh
+---------------------------------
+<code>
+DISK=/dev/nvme0n1
+PARTITION_NUM=1
+CRYPT_DEVICE="UUID=cf550c62-63b0-49fc-804a-3b4b112bcc03:cryptlvm"
+INITRD_LIST=(
+        intel-ucode.img
+        initramfs-linux-fallback.img
+)
+KERNEL_PARAM_LIST=(
+        "cryptdevice=$CRYPT_DEVICE"
+        "root=LABEL=ROOT"
+        "resume=/dev/cryptvg/SWAP"
+        rw 
+        $(printf " initrd=\%s" "${INITRD_LIST[@]}")
+)
+VMLINUZ_BOOTNUM=0
+
+KERNEL_PARAMS=$(printf " %s" "${KERNEL_PARAM_LIST[@]}")
+
+efibootmgr -B -b "$VMLINUZ_BOOTNUM" 
+efibootmgr -v -b "$VMLINUZ_BOOTNUM" --create \
+       --disk "$DISK" \
+       --part "$PARTITION_NUM" \
+       --label "vmlinuz" \
+       --loader "/vmlinuz-linux" \
+       --unicode "$KERNEL_PARAMS"
+</code>
