@@ -18,28 +18,43 @@ Making a boot stick
 ### Get the ISO
 
 You can [download][archdl] an ISO using BitTorrent or from a mirror.  I used
-[aarnet.edu.au][arch-at-aarnet]
+[syd.mirror.rackspace.com], but got the sigs from a few places.
 
-    curl -O https://mirror.aarnet.edu.au/pub/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso
-    curl -O https://mirror.aarnet.edu.au/pub/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso.sig
+    VER=2020.02.01
+    curl -o aarnet.sig https://mirror.aarnet.edu.au/pub/archlinux/iso/$VER/archlinux-$VER-x86_64.iso.sig
+    curl -o rackspace.sig https://mirror.rackspace.com/archlinux/iso/$VER/archlinux-$VER-x86_64.iso.sig
+    curl -o china.sig http://mirrors.cqu.edu.cn/archlinux/iso/$VER/archlinux-$VER-x86_64.iso.sig
+    curl -O https://syd.mirror.rackspace.com/archlinux/iso/$VER/archlinux-$VER-x86_64.iso.sig
+    sha256sum *.sig
+
+Which yields
+
+    bfa41224e009642e3ceeb2469bebb4a4034ca36c74a9465bd7dc86c47250f6d0  aarnet.sig
+    bfa41224e009642e3ceeb2469bebb4a4034ca36c74a9465bd7dc86c47250f6d0  archlinux-2020.02.01-x86_64.iso.sig
+    bfa41224e009642e3ceeb2469bebb4a4034ca36c74a9465bd7dc86c47250f6d0  china.sig
+    bfa41224e009642e3ceeb2469bebb4a4034ca36c74a9465bd7dc86c47250f6d0  rackspace.sig
+
+
+They match, good.
+
+    curl -O https://syd.mirror.rackspace.com/archlinux/iso/$VER/archlinux-$VER-x86_64.iso
 
 [archdl]: https://www.archlinux.org/download/
-[arch-at-aarnet]: https://mirror.aarnet.edu.au/pub/archlinux/iso/
+[arch-at-sydrack]: https://syd.mirror.rackspace.com/archlinux/iso/
 
 ### Verify that ISO
 
 I don't like or understand GPG enough to know what to do with the `.sig` file, except that since I am
 doing this on an existing arch installation, I run.
 
-    pacman-key -v archlinux-2019.04.01-x86_64.iso.sig
+    pacman-key -v archlinux-$VER-x86_64.iso.sig
 
 This checks the `.sig` against the corresponding file (in the same directory) and says:
 
 <pre>
-==> Checking archlinux-2019.04.01-x86_64.iso.sig...
-gpg: assuming signed data in 'archlinux-2019.04.01-x86_64.iso'
-gpg: Signature made Tue 02 Apr 2019 02:31:03 AEDT
-gpg:                using RSA key <b>4AA4767BBC9C4B1D18AE28B77F2D434B9741E8AC</b>
+==> Checking archlinux-2020.02.01-x86_64.iso.sig... (detached)
+gpg: Signature made Sat 01 Feb 2020 17:57:48 AEDT
+gpg:                using RSA key 4AA4767BBC9C4B1D18AE28B77F2D434B9741E8AC
 gpg: Note: trustdb not writable
 gpg: Good signature from "Pierre Schmitz <pierre@archlinux.de>" [full]
 </pre>
@@ -60,7 +75,8 @@ Easy peasy for nerds, and since this is he 21st century, we even have a
 progress indicator.
 
 <pre>
-dd status=progress bs=8192000 if=archlinux-2019.04.01-x86_64.iso of=<b>/SOME USB DEVICE/</b>
+VER=VER
+dd status=progress bs=8192000 if=archlinux-$VER-x86_64.iso of=<b>/SOME USB DEVICE/</b>
 </pre>
 
 Booting into the live environment
