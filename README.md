@@ -18,8 +18,7 @@ Making a boot stick
 ### Get the ISO
 
 You can [download][archdl] an ISO using BitTorrent or from a mirror.  I used
-[syd.mirror.rackspace.com] [aarnet.edu.au][arch-at-sydrack], but got the sigs
-from a few places.
+[syd.mirror.rackspace.com], but got the sigs from a few places.
 
     VER=2020.02.01
     curl -o aarnet.sig https://mirror.aarnet.edu.au/pub/archlinux/iso/$VER/archlinux-$VER-x86_64.iso.sig
@@ -76,7 +75,8 @@ Easy peasy for nerds, and since this is he 21st century, we even have a
 progress indicator.
 
 <pre>
-dd status=progress bs=8192000 if=archlinux-2019.04.01-x86_64.iso of=<b>/SOME USB DEVICE/</b>
+VER=VER
+dd status=progress bs=8192000 if=archlinux-$VER-x86_64.iso of=<b>/SOME USB DEVICE/</b>
 </pre>
 
 Booting into the live environment
