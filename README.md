@@ -351,9 +351,14 @@ Networking
 ----------
 
 Once we reboot into the real system, all our lovely auto-detected networking
-goes out the window.  I will use [netctl](netctl) which is a profile based
-network manager that drops into systemd quite nicely -- i.e. individual
-profiles are also systemd services.
+goes out the window.  Two options are documented here:
+
+* [netctl](netctl) a profile based network manager from Arch that drops into
+  systemd quite nicely -- i.e.  individual profiles are also systemd services.
+
+* [nothing at all](netdiy) tools like `wpa_supplicant` and `dhcpd` are quite
+  capable of auto-connecting you to the network.  The coordination can be
+  supplied by systemd alone.
 
 Wayland
 -------
