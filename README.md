@@ -87,7 +87,7 @@ is done depends on your machine.  See my notes for
 
 * [Lenovo Thinkpad X1 Carbon 5th Gen (20HRA04JAU)](thinkpad-x1-5th)
 
-One you the boot menu from the stick, select **Boot Arch Linux**.  This will
+Once you the boot menu from the stick, select **Boot Arch Linux**.  This will
 get you into a live Arch Linux environment that you can use to install the
 system, and also as a rescue disc.
 
