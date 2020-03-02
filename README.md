@@ -234,9 +234,10 @@ There are many options, and I have chosen:
 
 * **Use busybox initrd** (the default), as opposed to systemd.
 
-* **Using [EFISTUB](https://wiki.archlinux.org/index.php/EFISTUB)**.  This
-  turns the Kernel into standard EUFI executable that can be run from its
-  shell, or directly from the boot menu.
+* **Using [EFISTUB](https://wiki.archlinux.org/index.php/EFISTUB)**.  Kernels
+  (including the `vmlinuz` that Arch hands us) are compiled so that they double
+  as standard EUFI executables that can be run from its shell, or directly from
+  the boot menu.
 
 * **Booting the kernel directly from the boot menu**.  The alternative is to
   write a [EUFI shell script][nsh] booted from the menu.  I have such a script,
