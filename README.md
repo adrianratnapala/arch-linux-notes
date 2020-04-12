@@ -449,26 +449,26 @@ Networking
 Once we reboot into the real system, all our lovely auto-detected networking
 goes out the window.  Two options are documented here:
 
-* [netctl](netctl) a profile based network manager from Arch that drops into
+* [netctl](netctl.md) a profile based network manager from Arch that drops into
   systemd quite nicely -- i.e.  individual profiles are also systemd services.
 
-* [nothing at all](netdiy) tools like `wpa_supplicant` and `dhcpd` are quite
+* [nothing at all](netdiy.md) tools like `wpa_supplicant` and `dhcpd` are quite
   capable of auto-connecting you to the network.  The coordination can be
   supplied by systemd alone.
 
 Wayland
 -------
 
-I am using [Wayland](wayland), via the *sway* compositor with the *kitty*
+I am using [Wayland](wayland.md), via the *sway* compositor with the *kitty*
 terminal emulator.
 
 Microcode
 ---------
 
 Following: https://wiki.archlinux.org/index.php/Microcode, arch makes it easy
-to get manufacturer microcode.  [Here](microcode) is how we load it at boot.
+to get manufacturer microcode.  [Here](microcode.md) is how we load it at boot.
 
-[Suspend and Hibernate](suspend)
+[Suspend and Hibernate](suspend.md)
 -----------------
 
 Following
