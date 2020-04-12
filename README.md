@@ -105,24 +105,63 @@ Internet connectivity is the only potential trouble. My two-cents are:
 * One time I needed to **boot without the cable plugged in**.  But the problem
   did not recur. YYMV.
 
+Now that you are on the net, there is probably a working SSHD, so it is
+worth:
+
+* SSHing in from another machine (especially because it lets you cut and
+  paste to and from the terminal).
+
+* Starting a `screen` session.
+
+## Check for UEFI
+
+These instructions assume the system supports [UEFI](uefi) this is the case
+for both `scoter19` and `gollum`.  You can test it by seeing if the EFI NVRAM
+has any variables in it:
+
+```
+ls /sys/firmware/efi/efivars  | head -n 10                                          :(
+AMD_PBS_SETUP-a339d746-f678-49b3-9fc7-54ce0f9df226
+AMITSESetup-c811fa38-42c8-4579-a9bb-60e94eddfb34
+AmdSetup-3a997502-647a-4c82-998e-52ef9486a247
+AuditMode-8be4df61-93ca-11d2-aa0d-00e098032b8c
+Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c
+Boot0002-8be4df61-93ca-11d2-aa0d-00e098032b8c
+Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c
+Boot0004-8be4df61-93ca-11d2-aa0d-00e098032b8c
+BootCurrent-8be4df61-93ca-11d2-aa0d-00e098032b8c
+BootOptionSupport-8be4df61-93ca-11d2-aa0d-00e098032b8c
+```
+
+(That was on `gollum`).
+
+
 Disks
 -----
 
-I want to encrypt my as much as possible, but still boot simply.  So I have
-decided for `scooter19` to:
+I want to encrypt my as much as possible, but still boot simply.  So
+for both systems I have:
 
-* Have an unencrypted `/boot`, this is the same thing as the [(U)EFI
-  parition](uefi).  This parition shipped partition 1, with the volume label
-  `SYSTEM`.
+* An unencrypted `/boot`, this is the same thing as the [(U)EFI
+  parition](uefi).
+  * On `scooter19` this is 256 MiB; it shipped with the machine and is
+    labelled `SYSTEM`.
+  * On `gollum` this is 1GiB, I created it myself and it is labeled `EFI`.
 * Put the rest of the disk on encrypted [LUKS][luks] volume `cryptlvm`
 * Map this 1-1 onto a [LVM][lvm] volume group `cryptvg`, on which I have
-  - A 50G volume `ROOT` (`/`, `/var` and `/usr`)
-  - A 20G volume called `SWAP`, not used, but reserved for when I do hibernate-to-disk
+  - A 50G volume  volume called `ROOT` (`/`, `/var` and `/usr`)
+  - A 20G volume  volume called `SWAP`, not to used, but reserved for when I
+    do hibernate-to-disk
   - The rest is `HOME`, for `/home`
 
-The main authority for the encryption stuff is
-[https://wiki.archlinux.org/index.php/Dm-crypt][luks].
-Which has a sub-page for this kind of [LVM-on-LUKS][lvm-on-luks] setup.
+(TODO: it looks like `scooter19` is (wrongly) using swap!)
+
+The main authority for the encryption stuff is [https://wiki.archlinux.org/index.php/Dm-crypt][luks].  Which has a sub-page
+for this kind of [LVM-on-LUKS][lvm-on-luks] setup.
+
+The details below are for `scooter19`, the details for gollum are in
+[2020-02-gollum.md](2020-02-gollum.md).
+
 
 [LVM]: https://wiki.archlinux.org/index.php/LVM
 [luks]: https://wiki.archlinux.org/index.php/Dm-crypt
@@ -195,7 +234,9 @@ Setting up the installed OS
 ### Mounts
 
 The convention is that we mount all our filesystems under `/mnt` in a pattern
-which mirrors the mount on the final system.  On scooter19 that meant:
+which mirrors the mount on the final system.
+
+On scooter19 that meant:
 
     mount /dev/cryptvg/ROOT /mnt -L ROOT
     mkdir /mnt/home
@@ -204,6 +245,17 @@ which mirrors the mount on the final system.  On scooter19 that meant:
     mkdir /mnt/boot
     mount /dev/disk/by-label/SYSTEM efi # a.k.a /dev/nvme0n1p1
 
+On Gollum
+
+```
+mount /dev/cryptvg/ROOT /mnt
+mkdir /mnt/home
+mkdir /mnt/boot
+mount /dev/cryptvg/HOME /mnt/home
+mount /dev/disk/by-label/EFI /mnt/boot
+```
+
+
 ### Installing the packages
 
 Now we will install base packages, downloading them from repositories defined
@@ -211,9 +263,12 @@ in `/etc/pacman.d/mirrorlist`.  You can edit that file to use mirrors near
 you, see:
 https://wiki.archlinux.org/index.php/Installation_guide#Select_the_mirrors
 
-And install with
+At this point it really is best to `ssh` in from another machine, and to have
+a screen session.
 
-     pacstrap /mnt base
+Now we install quite a complete set of stuff:
+
+    pacstrap /mnt base linux linux-firmware vim lvm2 netctl
 
 
 ### Post-package setup
@@ -226,6 +281,40 @@ label-based names, `-U` uses UUIDs).
 
 There are many other straightforward instructions to follow at
 https://wiki.archlinux.org/index.php/Installation_guide#Configure_the_system
+
+Here is what I did for `gollum` -- though the only thing that should be
+different is the hostname.
+
+```
+arch-chroot /mnt
+ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
+hwclock --systohc
+
+/usr/bin/vim locale.gen
+```
+
+And we uncomment `en_AU` lines ONLY.  It's important to not allow `en_US` a
+look-in.
+
+```
+locale-gen
+echo "LANG=en_AU.UTF-8" > /etc/locale.conf
+
+echo "gollum" > /etc/hostname
+
+cat > /etc/hosts <<EOF
+127.0.0.1 localhost
+::1       localhost
+
+192.168.1.19    scooter19.home       scooter19       # 7C:2A:31:E5:39:59
+192.168.1.11    br-hl-3170cdw.home   br-hl-3170cdw   # 3C:2A:F4:3C:85:87
+192.168.1.11    BRN3C2AF43C8587.home BRN3C2AF43C8587 # 3C:2A:F4:3C:85:87
+192.168.1.10    gollum.home          gollum          # 96:C9:95:11:FB:96
+192.168.1.12    ravana.home          ravana          # 70:54:D2:44:EB:11
+EOF
+```
+
+
 
 Booting
 -------
@@ -263,13 +352,17 @@ things both at build time and at boot time.  The main thing you do in
 This [Dm-crypt system configuration][dm-crypt-sysconfig] wiki suggests a value
 for HOOKS, and I ended up with:
 
+`scooter19`:
    HOOKS=(base udev keyboard modconf block encrypt lvm2 filesystems fsck)
+
+`gollum`:
+   HOOKS=(base udev keyboard autodetect modconf block encrypt lvm2 resume filesystems fsck)
 
 Things to note are:
 
-* `autodetect` is entirely missing from here.  This means all possible kernel
-  modules etc will be included.  This is a silly thing to do, as `mkinicpio`
-  generates just such a fallback image anyway.
+* Dropping `autodetect` from `scooter19`  means all possible kernel modules
+  etc will be included.  This is a silly thing to do, as `mkinicpio` generates
+  just such a fallback image anyway.
 
 * The `keyboard` hook is early in the list. Before the encrypt hook.  We
   need the keyboard up and running in order to unlock the disk.  Even if I had
@@ -279,6 +372,8 @@ Things to note are:
 Now we run
 
     mkinitcpio -p linux
+
+This means run mkinitcpio getting flags from a "preset" called `linux`.
 
 Which dumps the files
 
