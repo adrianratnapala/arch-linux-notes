@@ -2,10 +2,21 @@ DIY (ish) network
 =================
 
 While I like [netctl](netctl), `netctl-auto` borked auto-connection of WiFi.
-And it seems the basic tools *[wpa_supplicant][arch-wpas]* and
-*[dhcpcd][arch-dhpcpd]* are actualy very capable.  Better stll,
+And it seems the basic tools )[wpa_supplicant][arch-wpasupp]_ and
+_[dhcpcd][arch-dhcpcd]_ are actualy very capable.  Better stll,
 [systemd][arch-systemd] is a good way of gluing things like this together.
 
+So the basics:
+
+```
+pacman -S dhcpcd
+```
+
+and if you want wifi
+
+```
+pacman -S wpa_supplicant
+```
 
 [arch-dhcpcd]: https://wiki.archlinux.org/index.php/Dhcpcd
 [arch-systemd]: https://wiki.archlinux.org/index.php/systemd
@@ -49,8 +60,8 @@ option in.
 
 This works, but merely connecting to the WiFi means we are stuck at Level 2.
 We need to "Connect to the Internet".  That is, get to level 3.
-    
-    dhcpd wlp4s0 
+
+    dhcpd wlp4s0
 
 systemd
 -------
@@ -70,7 +81,7 @@ Which opens
     --------------------------------------------------------------------
     [Service]
     ExecStart=
-    ExecStart=/usr/bin/wpa_supplicant -Dwext -c/etc/wpa_supplicant/wpa_supplicant.conf -i%I 
+    ExecStart=/usr/bin/wpa_supplicant -Dwext -c/etc/wpa_supplicant/wpa_supplicant.conf -i%I
 
 Note the empty `ExecStart=`, this is special-syntax which allows us to force
 override an existing value.
@@ -94,7 +105,18 @@ override an existing value.
     May 10 20:22:34 scooter19 wpa_supplicant[20408]: wlp4s0: Associated with ac:84:c6:3e:ed:f8
     May 10 20:22:34 scooter19 wpa_supplicant[20408]: wlp4s0: WPA: Key negotiation completed with ac:84:c6:3e:ed:f8 [PTK=CCMP GTK=TKIP]
     May 10 20:22:34 scooter19 wpa_supplicant[20408]: wlp4s0: CTRL-EVENT-CONNECTED - Connection to ac:84:c6:3e:ed:f8 completed [id=0 id_str=]
-    [root@scooter19 wpa_supplicant@wlp4s0.service.d]# 
+    [root@scooter19 wpa_supplicant@wlp4s0.service.d]#
 
 
 ### `dhcpcd.service`
+
+In the above we used `wpa_supplicant` to create the network device `wlp4s0`. In
+the wired case, we expect a device to just exist.  On gollum that is `enp30s0`.
+
+Either way we can tell `systemd` to use `dhcpcd` with
+
+    systemctl enable dhcpcd@wlp4s0.service
+
+Or
+
+    systemctl enable dhcpcd@enp30s0.service
